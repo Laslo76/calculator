@@ -125,7 +125,7 @@ class TopWindow:
         self.res_data.config(text=str(my_res))
 
     def do_save(self):
-        with open(r'.\notepad.txt', 'w') as f:
+        with open(r'notepad.txt', 'w') as f:
             f.write(self.data.get(1.0, "end-1c"))
 
     def do_load(self):
