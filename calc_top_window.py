@@ -129,6 +129,7 @@ class TopWindow:
             f.write(self.data.get(1.0, "end-1c"))
 
     def do_load(self):
+        self.do_clear()
         with open('notepad.txt', 'r') as f:
             txt = f.read()
             self.data.insert(1.0, txt)
