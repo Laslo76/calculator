@@ -16,6 +16,7 @@ def str_convert(work_str: str, t_expectation: str):
             def_result = None
         return def_result
 
+
 def my_operation(flowing_result, **kwargs):
     if kwargs["operand_one"] == "res":
         one_ = flowing_result
@@ -37,6 +38,7 @@ def my_operation(flowing_result, **kwargs):
         return one_ ** two_
     elif kwargs["command"] == "%":
         return one_ / 100 * two_
+
 
 class TopWindow:
     def __init__(self, master):
@@ -131,7 +133,8 @@ class TopWindow:
             txt = f.read()
             self.data.insert(1.0, txt)
 
-    def do_help(self):
+    @staticmethod
+    def do_help():
         msg = """
     A line-by-line calculator.
     The first operator, operation, second operator - is set in order.
@@ -143,7 +146,7 @@ class TopWindow:
         exponentiation - "^"
         getting a percentage - "%"     
     
-    Еxample:
+    Example:
         2
         *
         8
