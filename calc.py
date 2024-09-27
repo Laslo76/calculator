@@ -18,27 +18,15 @@ def str_convert(work_str: str, t_expectation: str):
         return def_result
 
 
-def my_operation(flowing_result, **kwargs):
+def my_operation(ops, flowing_result, **kwargs):
     one_ = flowing_result
     if kwargs["operand_one"] != "res":
         one_ = kwargs["operand_one"]
     two_ = kwargs["operand_two"]
-    match kwargs["command"]:
-        case "+":
-            return one_ + two_
-        case "-":
-            return one_ - two_
-        case "*":
-            return one_ * two_
-        case "/":
-            if two_ == 0.0:
-                return 'You cannot divide by 0!'
-            else:
-                return one_ / two_
-        case "^":
-            return one_ ** two_
-        case "%":
-            return one_ / 100 * two_
+    if kwargs["command"] == '/':
+        if two_ == 0.0:
+            return 'You cannot divide by 0!'
+    return ops[kwargs["command"]](one_, two_)
 
 
 class TopWindow:
@@ -81,7 +69,7 @@ class TopWindow:
 
     @staticmethod
     def get_commands(command_data: list) -> list:
-        command_dict_default = {"operand_one": None, "operand_two": None, "command": None}
+        command_dict_default = {"operand_one": "res", "operand_two": None, "command": None}
         list_commands = []
         t_expectation = "operand_one"
         t_command = command_dict_default.copy()
@@ -94,7 +82,6 @@ class TopWindow:
                 elif t_expectation == "operand_two":
                     list_commands.append(t_command)
                     t_command = command_dict_default.copy()
-                    t_command["operand_one"] = "res"
                     t_expectation = "command"
                 else:
                     t_expectation = "operand_two"
@@ -113,6 +100,8 @@ class TopWindow:
         self.res_data.config(text="")
 
     def do_calc(self):
+        ops = eval('{%s}' % ','.join([(f"'{op}': lambda a, b: a {op.replace("^", "**").
+                                       replace("%", "/ 100 *")} b") for op in '+-*/^%']))
         str_list = self.data.get(1.0, "end-1c").split("\n")
         commands_list = self.get_commands(str_list)
         if len(commands_list) == 0:
@@ -120,7 +109,7 @@ class TopWindow:
         else:
             my_res = 0.0
             for my_command in commands_list:
-                my_res = my_operation(my_res, **my_command)
+                my_res = my_operation(ops, my_res, **my_command)
                 if type(my_res) is not float:
                     break
         self.res_data.config(text=str(my_res))
