@@ -12,21 +12,9 @@ def str_convert(work_str: str, t_expectation: str):
             return None
     else:
         try:
-            def_result = float(com_str)
+            return float(com_str)
         except ValueError:
-            def_result = None
-        return def_result
-
-
-def my_operation(ops, flowing_result, **kwargs):
-    one_ = flowing_result
-    if kwargs["operand_one"] != "res":
-        one_ = kwargs["operand_one"]
-    two_ = kwargs["operand_two"]
-    if kwargs["command"] == '/':
-        if two_ == 0.0:
-            return 'You cannot divide by 0!'
-    return ops[kwargs["command"]](one_, two_)
+            return None
 
 
 class TopWindow:
@@ -69,29 +57,26 @@ class TopWindow:
 
     @staticmethod
     def get_commands(command_data: list) -> list:
-        command_dict_default = {"operand_one": "res", "operand_two": None, "command": None}
+        command_dict_default = {"one_": "res", "two_": None, "command": None}
         list_commands = []
-        t_expectation = "operand_one"
+        t_expectation = "one_"
         t_command = command_dict_default.copy()
         for t_str in command_data:
             t_value = str_convert(t_str, t_expectation)
-            if t_value is not None:
-                t_command[t_expectation] = t_value
-                if t_expectation == "operand_one":
-                    t_expectation = "command"
-                elif t_expectation == "operand_two":
-                    list_commands.append(t_command)
-                    t_command = command_dict_default.copy()
-                    t_expectation = "command"
-                else:
-                    t_expectation = "operand_two"
+            if t_value is None:
+                t_expectation = "one_"
+                break
+            t_command[t_expectation] = t_value
+            if t_expectation == "one_":
+                t_expectation = "command"
+            elif t_expectation == "two_":
+                list_commands.append(t_command)
+                t_command = command_dict_default.copy()
+                t_expectation = "command"
             else:
-                list_commands = []
-        if t_expectation == "command":
-            if t_command["operand_one"] == "res":
-                return list_commands
-            else:
-                return []
+                t_expectation = "two_"
+        if t_expectation == "command" and t_command["one_"] is not None:
+            return list_commands
         else:
             return []
 
@@ -104,14 +89,17 @@ class TopWindow:
                                        replace("%", "/ 100 *")} b") for op in '+-*/^%']))
         str_list = self.data.get(1.0, "end-1c").split("\n")
         commands_list = self.get_commands(str_list)
-        if len(commands_list) == 0:
-            my_res = 'Data error!'
-        else:
+        my_res = 'Data error!'
+        if len(commands_list) > 0:
             my_res = 0.0
             for my_command in commands_list:
-                my_res = my_operation(ops, my_res, **my_command)
-                if type(my_res) is not float:
+                one_ = my_res
+                if my_command["one_"] != "res":
+                    one_ = my_command["one_"]
+                if my_command["command"] == '/' and my_command["two_"] == 0.0:
+                    my_res = 'You cannot divide by 0!'
                     break
+                my_res = ops[my_command["command"]](one_, my_command["two_"])
         self.res_data.config(text=str(my_res))
 
     def do_save(self):
